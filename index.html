@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>Sistema Financeiro V12 - Google Sheets</title>
 
@@ -40,14 +40,24 @@
 
     <style>
       .app-container {
+        width: 100%;
         max-width: 1200px;
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       html,
       body {
         overscroll-behavior: none;
         overflow-x: hidden;
-        height: 100%;
+        min-height: 100%;
+        width: 100%;
+      }
+
+      body {
+        -webkit-text-size-adjust: 100%;
       }
 
       /* Scrollbar */
@@ -131,6 +141,58 @@
         to {
           opacity: 1;
           transform: translateY(0);
+        }
+      }
+
+      .table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .table-scroll table {
+        min-width: 640px;
+      }
+
+      .chart-box {
+        position: relative;
+        min-height: 240px;
+      }
+
+      .safe-px {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+      }
+
+      @media (max-width: 767px) {
+        .app-table th,
+        .app-table td {
+          padding: 0.65rem 0.45rem;
+          font-size: 0.8125rem;
+        }
+
+        #sidebar {
+          width: min(85vw, 320px);
+        }
+
+        #content {
+          padding-bottom: 6rem;
+        }
+
+        .chart-box {
+          min-height: 220px;
+        }
+      }
+
+      @media (max-width: 639px) {
+        .app-table th,
+        .app-table td {
+          padding: 0.55rem 0.4rem;
+          font-size: 0.75rem;
+        }
+
+        .chart-box {
+          min-height: 200px;
         }
       }
     </style>
@@ -276,7 +338,7 @@
         class="sticky top-0 z-30 bg-white/90 dark:bg-zinc-900/90 backdrop-blur border-b border-zinc-200 dark:border-zinc-800"
       >
         <div
-          class="app-container mx-auto flex items-center justify-between px-4 py-3"
+          class="app-container mx-auto flex items-center justify-between gap-3 safe-px py-3"
         >
           <div class="flex items-center gap-4">
             <button
@@ -294,7 +356,7 @@
               >
             </div>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 shrink-0">
             <button
               id="btnTheme"
               class="w-10 h-10 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 flex items-center justify-center transition-colors"
@@ -319,9 +381,14 @@
       </header>
 
       <div
-        class="app-container mx-auto grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6 p-4 flex-1 items-start"
+        id="sidebarBackdrop"
+        class="hidden fixed inset-0 bg-black/40 backdrop-blur-[1px] z-30 md:hidden"
+      ></div>
+
+      <div
+        class="app-container mx-auto grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4 md:gap-6 px-4 pb-4 md:p-4 flex-1 items-start"
       >
-        <nav id="sidebar" class="hidden md:block sticky top-24 space-y-1 z-20">
+        <nav id="sidebar" class="hidden fixed inset-y-0 left-0 z-40 w-[85vw] max-w-xs overflow-y-auto bg-white dark:bg-zinc-900 p-4 shadow-2xl md:sticky md:top-24 md:block md:w-auto md:max-w-none md:bg-transparent md:p-0 md:shadow-none space-y-1">
           <div
             class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-3"
           >
@@ -390,7 +457,7 @@
           </div>
         </nav>
 
-        <main id="content" class="min-w-0 pb-20 md:pb-0">
+        <main id="content" class="min-w-0 pb-24 md:pb-0">
           <section id="view-dashboard" class="view space-y-6">
             <div
               id="dashAlertas"
@@ -447,7 +514,7 @@
                   Relatórios completos com dashboard.
                 </p>
               </div>
-              <div class="flex gap-2 w-full sm:w-auto">
+              <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <button
                   id="btnExportXLSX"
                   class="flex-1 sm:flex-none py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2"
@@ -481,7 +548,7 @@
                     <option value="ano">Por Ano</option>
                   </select>
                 </div>
-                <div class="h-64 flex-1"><canvas id="chartFluxo"></canvas></div>
+                <div class="chart-box h-64 flex-1"><canvas id="chartFluxo"></canvas></div>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div
@@ -492,7 +559,7 @@
                   >
                     Receita Atual vs Saídas
                   </h3>
-                  <div class="h-48 flex-1">
+                  <div class="chart-box h-48 flex-1">
                     <canvas id="chartConsumoAtual"></canvas>
                   </div>
                 </div>
@@ -504,7 +571,7 @@
                   >
                     Previsão (Fim do Mês)
                   </h3>
-                  <div class="h-48 flex-1">
+                  <div class="chart-box h-48 flex-1">
                     <canvas id="chartPrevisao"></canvas>
                   </div>
                 </div>
@@ -730,7 +797,7 @@
                   </div>
                 </div>
 
-                <div class="md:col-span-12 flex gap-3 pt-2">
+                <div class="md:col-span-12 flex flex-col sm:flex-row gap-3 pt-2">
                   <button
                     type="submit"
                     id="btnSaveLanc"
@@ -758,7 +825,7 @@
                 <h3 class="font-bold text-zinc-700 dark:text-zinc-300">
                   Histórico Recente
                 </h3>
-                <div class="flex gap-2 w-full md:w-auto">
+                <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                   <input
                     id="filtroTexto"
                     placeholder="Buscar..."
@@ -770,7 +837,7 @@
                   ></select>
                 </div>
               </div>
-              <div class="overflow-x-auto">
+              <div class="table-scroll">
                 <table class="w-full text-left border-collapse app-table">
                   <thead
                     class="bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700"
@@ -800,7 +867,7 @@
               <h3 class="font-bold text-zinc-700 mb-4 dark:text-zinc-300">
                 Resumo dos Cartões
               </h3>
-              <div class="overflow-x-auto">
+              <div class="table-scroll">
                 <table class="w-full text-sm app-table">
                   <thead class="bg-zinc-50 dark:bg-zinc-800">
                     <tr>
@@ -847,7 +914,7 @@
                     class="block text-xs font-semibold text-indigo-400 mb-1"
                     >Selecionar Fatura</label
                   >
-                  <div class="flex gap-2">
+                  <div class="flex flex-col sm:flex-row gap-2">
                     <select
                       id="fatCartao"
                       class="flex-1 px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm"
@@ -863,7 +930,7 @@
                     class="block text-xs font-semibold text-indigo-400 mb-1"
                     >Pagamento / Exportação</label
                   >
-                  <div class="flex gap-2">
+                  <div class="flex flex-col sm:flex-row gap-2">
                     <select
                       id="fatContaPg"
                       class="flex-1 px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm"
@@ -884,7 +951,7 @@
                 </div>
               </div>
 
-              <div class="overflow-x-auto">
+              <div class="table-scroll">
                 <table class="w-full text-sm app-table">
                   <thead class="bg-zinc-50 dark:bg-zinc-800">
                     <tr>
@@ -912,10 +979,10 @@
                   Contas Bancárias
                 </h3>
                 <form id="formConta" class="flex flex-col gap-3 mb-4">
-                  <div class="flex gap-2">
+                  <div class="flex flex-col sm:flex-row gap-2">
                     <select
                       id="contaBanco"
-                      class="px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none w-1/3"
+                      class="w-full sm:w-1/3 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                     >
                       <option value="">Banco...</option>
                       <option value="Nubank">Nubank</option>
@@ -930,10 +997,10 @@
                     <input
                       id="contaNome"
                       placeholder="Apelido (ex: Conta Salário)"
-                      class="w-2/3 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                      class="w-full sm:w-2/3 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                     />
                   </div>
-                  <div class="flex gap-2">
+                  <div class="flex flex-col sm:flex-row gap-2">
                     <input
                       id="contaSaldoIni"
                       type="number"
@@ -964,7 +1031,7 @@
                     placeholder="Nome do Cartão"
                     class="w-full px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                   />
-                  <div class="flex gap-2">
+                  <div class="flex flex-col sm:flex-row gap-2">
                     <input
                       id="cartaoLimite"
                       type="number"
@@ -975,13 +1042,13 @@
                       id="cartaoFech"
                       type="number"
                       placeholder="Dia Fech."
-                      class="w-20 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                      class="w-full sm:w-20 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                     />
                     <input
                       id="cartaoVenc"
                       type="number"
                       placeholder="Dia Venc."
-                      class="w-20 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                      class="w-full sm:w-20 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                     />
                   </div>
                   <button
@@ -1082,7 +1149,7 @@
                     class="w-full px-3 py-2 bg-white border border-orange-200 rounded-lg text-sm"
                   />
                 </div>
-                <div class="md:col-span-12 flex gap-2">
+                <div class="md:col-span-12 flex flex-col sm:flex-row gap-2">
                   <button
                     type="submit"
                     id="btnSaveBoleto"
@@ -1116,12 +1183,12 @@
                   placeholder="Objetivo"
                   class="flex-1 px-3 py-2 bg-zinc-50 border rounded-lg text-sm"
                 />
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row gap-2">
                   <input
                     id="metaValor"
                     type="number"
                     placeholder="Alvo (R$)"
-                    class="w-24 px-3 py-2 bg-zinc-50 border rounded-lg text-sm"
+                    class="w-full sm:w-24 px-3 py-2 bg-zinc-50 border rounded-lg text-sm"
                   />
                   <button
                     type="submit"
@@ -1231,7 +1298,7 @@
                 class="w-full px-3 py-2 bg-zinc-50 border rounded-lg outline-none"
               ></select>
             </div>
-            <div class="flex gap-2 pt-2">
+            <div class="flex flex-col sm:flex-row gap-2 pt-2">
               <button
                 type="button"
                 onclick="$('#modalMeta').classList.add('hidden')"
@@ -1937,6 +2004,20 @@
           location.reload();
         };
 
+        const closeSidebar = () => {
+          if (window.innerWidth < 768) {
+            $("#sidebar").classList.add("hidden");
+            $("#sidebarBackdrop").classList.add("hidden");
+            document.body.classList.remove("overflow-hidden");
+          }
+        };
+
+        const openSidebar = () => {
+          $("#sidebar").classList.remove("hidden");
+          $("#sidebarBackdrop").classList.remove("hidden");
+          document.body.classList.add("overflow-hidden");
+        };
+
         $$(".navbtn").forEach(
           (b) =>
             (b.onclick = () => {
@@ -1968,12 +2049,26 @@
               );
               $$(".view").forEach((v) => v.classList.add("hidden"));
               $("#view-" + b.dataset.view).classList.remove("hidden");
-              $("#sidebar").classList.add("hidden");
+              closeSidebar();
               renderAll();
             }),
         );
 
-        $("#btnMenu").onclick = () => $("#sidebar").classList.toggle("hidden");
+        $("#btnMenu").onclick = () => {
+          if ($("#sidebar").classList.contains("hidden")) openSidebar();
+          else closeSidebar();
+        };
+
+        $("#sidebarBackdrop").onclick = closeSidebar;
+        window.addEventListener("resize", () => {
+          if (window.innerWidth >= 768) {
+            $("#sidebar").classList.remove("hidden");
+            $("#sidebarBackdrop").classList.add("hidden");
+            document.body.classList.remove("overflow-hidden");
+          } else {
+            $("#sidebar").classList.add("hidden");
+          }
+        });
 
         $("#formLanc").onsubmit = (e) => {
           e.preventDefault();
@@ -2594,7 +2689,7 @@
         $("#listaCats").innerHTML = d.categories
           .map(
             (c) =>
-              `<li class="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-100 dark:border-zinc-700"><div class="flex items-center gap-2"><span class="text-xl">${c.icon || ""}</span><span class="font-medium text-sm text-zinc-700 dark:text-zinc-200">${c.name}</span> <span class="text-xs px-2 py-0.5 rounded-full ${c.type === "entrada" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}">${c.type}</span></div> <button onclick="delCat('${c.id}')" class="text-zinc-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></li>`,
+              `<li class="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-100 dark:border-zinc-700"><div class="flex items-center gap-2 shrink-0"><span class="text-xl">${c.icon || ""}</span><span class="font-medium text-sm text-zinc-700 dark:text-zinc-200">${c.name}</span> <span class="text-xs px-2 py-0.5 rounded-full ${c.type === "entrada" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}">${c.type}</span></div> <button onclick="delCat('${c.id}')" class="text-zinc-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></li>`,
           )
           .join("");
 
