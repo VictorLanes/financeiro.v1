@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
     />
     <title>Sistema Financeiro V12 - Google Sheets</title>
 
@@ -40,24 +40,14 @@
 
     <style>
       .app-container {
-        width: 100%;
         max-width: 1200px;
-      }
-
-      * {
-        box-sizing: border-box;
       }
 
       html,
       body {
         overscroll-behavior: none;
         overflow-x: hidden;
-        min-height: 100%;
-        width: 100%;
-      }
-
-      body {
-        -webkit-text-size-adjust: 100%;
+        height: 100%;
       }
 
       /* Scrollbar */
@@ -133,6 +123,33 @@
       .view {
         animation: fadeIn 0.3s ease-in-out;
       }
+      .chart-card-hidden {
+        display: none !important;
+      }
+      .dashboard-chart-canvas {
+        position: relative;
+        min-height: 260px;
+      }
+      .dashboard-chart-canvas.smaller {
+        min-height: 220px;
+      }
+      .contas-card,
+      .cartoes-card {
+        height: 100%;
+      }
+      @media (max-width: 1024px) {
+        .dashboard-chart-canvas {
+          min-height: 240px;
+        }
+      }
+      @media (max-width: 640px) {
+        .dashboard-chart-canvas {
+          min-height: 220px;
+        }
+        .dashboard-chart-canvas.smaller {
+          min-height: 200px;
+        }
+      }
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -141,58 +158,6 @@
         to {
           opacity: 1;
           transform: translateY(0);
-        }
-      }
-
-      .table-scroll {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .table-scroll table {
-        min-width: 640px;
-      }
-
-      .chart-box {
-        position: relative;
-        min-height: 240px;
-      }
-
-      .safe-px {
-        padding-left: max(1rem, env(safe-area-inset-left));
-        padding-right: max(1rem, env(safe-area-inset-right));
-      }
-
-      @media (max-width: 767px) {
-        .app-table th,
-        .app-table td {
-          padding: 0.65rem 0.45rem;
-          font-size: 0.8125rem;
-        }
-
-        #sidebar {
-          width: min(85vw, 320px);
-        }
-
-        #content {
-          padding-bottom: 6rem;
-        }
-
-        .chart-box {
-          min-height: 220px;
-        }
-      }
-
-      @media (max-width: 639px) {
-        .app-table th,
-        .app-table td {
-          padding: 0.55rem 0.4rem;
-          font-size: 0.75rem;
-        }
-
-        .chart-box {
-          min-height: 200px;
         }
       }
     </style>
@@ -338,7 +303,7 @@
         class="sticky top-0 z-30 bg-white/90 dark:bg-zinc-900/90 backdrop-blur border-b border-zinc-200 dark:border-zinc-800"
       >
         <div
-          class="app-container mx-auto flex items-center justify-between gap-3 safe-px py-3"
+          class="app-container mx-auto flex items-center justify-between px-4 py-3"
         >
           <div class="flex items-center gap-4">
             <button
@@ -356,7 +321,7 @@
               >
             </div>
           </div>
-          <div class="flex items-center gap-2 shrink-0">
+          <div class="flex items-center gap-2">
             <button
               id="btnTheme"
               class="w-10 h-10 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 flex items-center justify-center transition-colors"
@@ -381,14 +346,9 @@
       </header>
 
       <div
-        id="sidebarBackdrop"
-        class="hidden fixed inset-0 bg-black/40 backdrop-blur-[1px] z-30 md:hidden"
-      ></div>
-
-      <div
-        class="app-container mx-auto grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4 md:gap-6 px-4 pb-4 md:p-4 flex-1 items-start"
+        class="app-container mx-auto grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6 p-4 flex-1 items-start"
       >
-        <nav id="sidebar" class="hidden fixed inset-y-0 left-0 z-40 w-[85vw] max-w-xs overflow-y-auto bg-white dark:bg-zinc-900 p-4 shadow-2xl md:sticky md:top-24 md:block md:w-auto md:max-w-none md:bg-transparent md:p-0 md:shadow-none space-y-1">
+        <nav id="sidebar" class="hidden md:block sticky top-24 space-y-1 z-20">
           <div
             class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-3"
           >
@@ -457,7 +417,7 @@
           </div>
         </nav>
 
-        <main id="content" class="min-w-0 pb-24 md:pb-0">
+        <main id="content" class="min-w-0 pb-20 md:pb-0">
           <section id="view-dashboard" class="view space-y-6">
             <div
               id="dashAlertas"
@@ -514,15 +474,17 @@
                   Relatórios completos com dashboard.
                 </p>
               </div>
-              <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <div class="flex gap-2 w-full sm:w-auto">
                 <button
                   id="btnExportXLSX"
+                  type="button"
                   class="flex-1 sm:flex-none py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium shadow-sm transition-all flex items-center justify-center gap-2"
                 >
                   <i class="fa-solid fa-file-excel"></i> Excel Completo
                 </button>
                 <button
                   id="btnExportCSV"
+                  type="button"
                   class="flex-1 sm:flex-none py-2.5 px-4 bg-white dark:bg-zinc-800 border border-emerald-200 dark:border-zinc-700 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-zinc-700 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
                 >
                   <i class="fa-solid fa-file-csv"></i> CSV
@@ -530,17 +492,23 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div
-                class="bg-white p-5 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col"
-              >
-                <div class="flex justify-between items-center mb-4">
+            <div
+              class="bg-white p-5 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 space-y-4"
+            >
+              <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                <div>
                   <h3 class="font-semibold text-zinc-700 dark:text-zinc-300">
-                    Fluxo de Caixa p/ Mês
+                    Gráficos do Dashboard
                   </h3>
+                  <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                    Escolha quais gráficos mostrar. O layout se adapta ao dispositivo.
+                  </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+                  <label class="text-xs font-semibold text-zinc-500 uppercase">Período do Fluxo</label>
                   <select
                     id="fluxoPeriodo"
-                    class="bg-zinc-50 border border-zinc-200 text-xs rounded-lg px-2 py-1 outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
+                    class="bg-zinc-50 border border-zinc-200 text-sm rounded-lg px-3 py-2 outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-white"
                     onchange="renderCharts(loadUser())"
                   >
                     <option value="dia">Por Dia</option>
@@ -548,30 +516,44 @@
                     <option value="ano">Por Ano</option>
                   </select>
                 </div>
-                <div class="chart-box h-64 flex-1"><canvas id="chartFluxo"></canvas></div>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div id="dashboardChartControls" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
+              <div id="dashboardChartsGrid" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div
-                  class="bg-white p-5 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col"
+                  id="cardChartFluxo"
+                  class="chart-card bg-zinc-50/70 dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 p-5 flex flex-col"
+                >
+                  <div class="flex justify-between items-center mb-4 gap-3">
+                    <h3 class="font-semibold text-zinc-700 dark:text-zinc-300">
+                      Fluxo de Caixa
+                    </h3>
+                    <span class="text-[11px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Principal</span>
+                  </div>
+                  <div class="dashboard-chart-canvas flex-1"><canvas id="chartFluxo"></canvas></div>
+                </div>
+                <div
+                  id="cardChartConsumo"
+                  class="chart-card bg-zinc-50/70 dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 p-5 flex flex-col"
                 >
                   <h3
                     class="font-semibold text-zinc-700 dark:text-zinc-300 mb-4 text-xs text-center uppercase tracking-wide"
                   >
                     Receita Atual vs Saídas
                   </h3>
-                  <div class="chart-box h-48 flex-1">
+                  <div class="dashboard-chart-canvas smaller flex-1">
                     <canvas id="chartConsumoAtual"></canvas>
                   </div>
                 </div>
                 <div
-                  class="bg-white p-5 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col"
+                  id="cardChartPrevisao"
+                  class="chart-card bg-zinc-50/70 dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 p-5 flex flex-col"
                 >
                   <h3
                     class="font-semibold text-zinc-700 dark:text-zinc-300 mb-4 text-xs text-center uppercase tracking-wide"
                   >
                     Previsão (Fim do Mês)
                   </h3>
-                  <div class="chart-box h-48 flex-1">
+                  <div class="dashboard-chart-canvas smaller flex-1">
                     <canvas id="chartPrevisao"></canvas>
                   </div>
                 </div>
@@ -797,7 +779,7 @@
                   </div>
                 </div>
 
-                <div class="md:col-span-12 flex flex-col sm:flex-row gap-3 pt-2">
+                <div class="md:col-span-12 flex gap-3 pt-2">
                   <button
                     type="submit"
                     id="btnSaveLanc"
@@ -825,7 +807,7 @@
                 <h3 class="font-bold text-zinc-700 dark:text-zinc-300">
                   Histórico Recente
                 </h3>
-                <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                <div class="flex gap-2 w-full md:w-auto">
                   <input
                     id="filtroTexto"
                     placeholder="Buscar..."
@@ -837,7 +819,7 @@
                   ></select>
                 </div>
               </div>
-              <div class="table-scroll">
+              <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse app-table">
                   <thead
                     class="bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700"
@@ -867,7 +849,7 @@
               <h3 class="font-bold text-zinc-700 mb-4 dark:text-zinc-300">
                 Resumo dos Cartões
               </h3>
-              <div class="table-scroll">
+              <div class="overflow-x-auto">
                 <table class="w-full text-sm app-table">
                   <thead class="bg-zinc-50 dark:bg-zinc-800">
                     <tr>
@@ -914,7 +896,7 @@
                     class="block text-xs font-semibold text-indigo-400 mb-1"
                     >Selecionar Fatura</label
                   >
-                  <div class="flex flex-col sm:flex-row gap-2">
+                  <div class="flex gap-2">
                     <select
                       id="fatCartao"
                       class="flex-1 px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm"
@@ -930,7 +912,7 @@
                     class="block text-xs font-semibold text-indigo-400 mb-1"
                     >Pagamento / Exportação</label
                   >
-                  <div class="flex flex-col sm:flex-row gap-2">
+                  <div class="flex gap-2">
                     <select
                       id="fatContaPg"
                       class="flex-1 px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm"
@@ -951,7 +933,7 @@
                 </div>
               </div>
 
-              <div class="table-scroll">
+              <div class="overflow-x-auto">
                 <table class="w-full text-sm app-table">
                   <thead class="bg-zinc-50 dark:bg-zinc-800">
                     <tr>
@@ -973,16 +955,16 @@
           <section id="view-contas" class="view hidden space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div
-                class="bg-white p-5 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800"
+                class="contas-card bg-white p-5 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col"
               >
                 <h3 class="font-bold text-zinc-700 dark:text-zinc-300 mb-3">
                   Contas Bancárias
                 </h3>
                 <form id="formConta" class="flex flex-col gap-3 mb-4">
-                  <div class="flex flex-col sm:flex-row gap-2">
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <select
                       id="contaBanco"
-                      class="w-full sm:w-1/3 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                      class="w-full h-12 px-3 bg-zinc-50 border rounded-lg text-sm outline-none sm:col-span-1"
                     >
                       <option value="">Banco...</option>
                       <option value="Nubank">Nubank</option>
@@ -997,20 +979,20 @@
                     <input
                       id="contaNome"
                       placeholder="Apelido (ex: Conta Salário)"
-                      class="w-full sm:w-2/3 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                      class="w-full h-12 px-3 bg-zinc-50 border rounded-lg text-sm outline-none sm:col-span-2"
                     />
                   </div>
-                  <div class="flex flex-col sm:flex-row gap-2">
+                  <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
                     <input
                       id="contaSaldoIni"
                       type="number"
                       step="0.01"
                       placeholder="Saldo Inicial"
-                      class="flex-1 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                      class="w-full h-12 px-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                     />
                     <button
                       type="submit"
-                      class="bg-emerald-600 text-white px-4 rounded-lg font-bold"
+                      class="bg-emerald-600 text-white px-4 h-12 rounded-lg font-bold w-full sm:w-auto sm:min-w-[112px]"
                     >
                       Adicionar
                     </button>
@@ -1020,7 +1002,7 @@
               </div>
 
               <div
-                class="bg-white p-5 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800"
+                class="cartoes-card bg-white p-5 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col"
               >
                 <h3 class="font-bold text-zinc-700 dark:text-zinc-300 mb-3">
                   Cartões de Crédito
@@ -1029,31 +1011,31 @@
                   <input
                     id="cartaoNome"
                     placeholder="Nome do Cartão"
-                    class="w-full px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                    class="w-full h-12 px-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                   />
-                  <div class="flex flex-col sm:flex-row gap-2">
+                  <div class="grid grid-cols-1 sm:grid-cols-[1fr_110px_110px] gap-2">
                     <input
                       id="cartaoLimite"
                       type="number"
                       placeholder="Limite"
-                      class="flex-1 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                      class="w-full h-12 px-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                     />
                     <input
                       id="cartaoFech"
                       type="number"
                       placeholder="Dia Fech."
-                      class="w-full sm:w-20 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                      class="w-full h-12 px-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                     />
                     <input
                       id="cartaoVenc"
                       type="number"
                       placeholder="Dia Venc."
-                      class="w-full sm:w-20 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                      class="w-full h-12 px-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                     />
                   </div>
                   <button
                     type="submit"
-                    class="bg-emerald-600 text-white py-3 rounded-lg text-sm font-bold w-full"
+                    class="bg-emerald-600 text-white h-12 rounded-lg text-sm font-bold w-full mt-auto"
                   >
                     Adicionar Cartão
                   </button>
@@ -1078,7 +1060,7 @@
                 <input
                   id="catNome"
                   placeholder="Nova Categoria"
-                  class="flex-1 px-3 py-3 bg-zinc-50 border rounded-lg text-sm outline-none"
+                  class="w-full h-12 px-3 bg-zinc-50 border rounded-lg text-sm outline-none"
                 />
                 <select
                   id="catTipo"
@@ -1149,7 +1131,7 @@
                     class="w-full px-3 py-2 bg-white border border-orange-200 rounded-lg text-sm"
                   />
                 </div>
-                <div class="md:col-span-12 flex flex-col sm:flex-row gap-2">
+                <div class="md:col-span-12 flex gap-2">
                   <button
                     type="submit"
                     id="btnSaveBoleto"
@@ -1183,12 +1165,12 @@
                   placeholder="Objetivo"
                   class="flex-1 px-3 py-2 bg-zinc-50 border rounded-lg text-sm"
                 />
-                <div class="flex flex-col sm:flex-row gap-2">
+                <div class="flex gap-2">
                   <input
                     id="metaValor"
                     type="number"
                     placeholder="Alvo (R$)"
-                    class="w-full sm:w-24 px-3 py-2 bg-zinc-50 border rounded-lg text-sm"
+                    class="w-24 px-3 py-2 bg-zinc-50 border rounded-lg text-sm"
                   />
                   <button
                     type="submit"
@@ -1201,30 +1183,7 @@
               <ul id="listaMetas" class="space-y-4"></ul>
             </div>
 
-            <div
-              class="bg-white p-6 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800"
-            >
-              <h3
-                class="font-bold text-blue-700 dark:text-blue-500 mb-4 flex items-center gap-2"
-              >
-                <i class="fa-solid fa-paperclip"></i> Anexos & Arquivos
-              </h3>
-              <label
-                class="block w-full p-8 border-2 border-dashed border-blue-200 dark:border-blue-900 rounded-xl bg-blue-50 dark:bg-blue-900/10 hover:bg-blue-100 dark:hover:bg-blue-900/20 text-center cursor-pointer transition-colors"
-              >
-                <i
-                  class="fa-solid fa-cloud-arrow-up text-3xl text-blue-300 dark:text-blue-600 mb-2"
-                ></i>
-                <div
-                  class="text-sm font-medium text-blue-700 dark:text-blue-400"
-                >
-                  Clique para enviar arquivos
-                </div>
-                <input id="fileAnexo" type="file" multiple class="hidden" />
-              </label>
-              <ul id="listaAnexos" class="mt-4 space-y-2"></ul>
-            </div>
-          </section>
+                      </section>
 
           <section id="view-backup" class="view hidden">
             <div
@@ -1298,7 +1257,7 @@
                 class="w-full px-3 py-2 bg-zinc-50 border rounded-lg outline-none"
               ></select>
             </div>
-            <div class="flex flex-col sm:flex-row gap-2 pt-2">
+            <div class="flex gap-2 pt-2">
               <button
                 type="button"
                 onclick="$('#modalMeta').classList.add('hidden')"
@@ -1412,6 +1371,73 @@
       const parseNum = (v) => {
         if (!v) return 0;
         return Number(v.toString().replace(",", "."));
+      };
+
+      const escapeHtml = (value) =>
+        String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+
+      const daysBetween = (futureDate, baseDate = new Date()) => {
+        const start = new Date(baseDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(futureDate);
+        end.setHours(0, 0, 0, 0);
+        return Math.ceil((end - start) / 86400000);
+      };
+
+      function normalizeUserData(data) {
+        if (!data) return seedUser(currentUser || "user");
+        data.settings = data.settings || { currency: "BRL" };
+        data.accounts = Array.isArray(data.accounts) ? data.accounts : [];
+        data.categories = Array.isArray(data.categories) ? data.categories : [];
+        data.cards = Array.isArray(data.cards) ? data.cards : [];
+        data.transactions = Array.isArray(data.transactions) ? data.transactions : [];
+        data.metas = Array.isArray(data.metas) ? data.metas : [];
+        data.boletos = Array.isArray(data.boletos) ? data.boletos : [];
+        data.anexos = Array.isArray(data.anexos) ? data.anexos : [];
+        data.invoicesPaid = data.invoicesPaid || {};
+
+        data.metas = data.metas.map((m) => ({
+          ...m,
+          valorAtual: Number(m.valorAtual || 0),
+          guardadoEm: Array.isArray(m.guardadoEm) ? m.guardadoEm : [],
+        }));
+
+        data.boletos = data.boletos.map((b) => ({
+          ...b,
+          createdAt: b.createdAt || Date.now(),
+          expiraEm: b.expiraEm || Date.now() + 30 * 86400000,
+        }));
+
+        data.anexos = data.anexos.map((a) => ({
+          ...a,
+          createdAt: a.createdAt || Date.now(),
+          expiraEm: a.expiraEm || Date.now() + 30 * 86400000,
+        }));
+
+        return pruneExpiredData(data);
+      }
+
+      function pruneExpiredData(data) {
+        const now = Date.now();
+        data.boletos = (data.boletos || []).filter((b) => Number(b.expiraEm || 0) > now);
+        data.anexos = (data.anexos || []).filter((a) => Number(a.expiraEm || 0) > now);
+        return data;
+      }
+
+
+      window.copyPix = async (value) => {
+        if (!value) return;
+        try {
+          await navigator.clipboard.writeText(value);
+          alert("PIX copiado!");
+        } catch (e) {
+          prompt("Copie a chave PIX:", value);
+        }
       };
 
       const isCredit = (m) => {
@@ -1545,7 +1571,10 @@
 
       const seedUser = (user) => ({
         profile: { user, created: Date.now() },
-        settings: { currency: "BRL" },
+        settings: {
+          currency: "BRL",
+          dashboardCharts: { fluxo: true, consumo: true, previsao: true },
+        },
         accounts: [
           {
             id: uuid(),
@@ -1581,7 +1610,7 @@
 
       const saveUser = async (data) => {
         if (!currentUser) return;
-        userDataCache = data;
+        userDataCache = normalizeUserData(data);
         try {
           await apiRequest("saveUser", { username: currentUser, data });
           renderAll();
@@ -1591,56 +1620,25 @@
         }
       };
 
-      // ================= INDEXED DB (Arquivos) =================
-
-      const anexoDB = {
-        db: null,
-        init(dbName) {
-          return new Promise((resolve, reject) => {
-            const request = indexedDB.open(dbName, 1);
-            request.onupgradeneeded = (e) => {
-              const d = e.target.result;
-              if (!d.objectStoreNames.contains("files")) {
-                d.createObjectStore("files", { keyPath: "id" });
-              }
-            };
-            request.onsuccess = (e) => {
-              this.db = e.target.result;
-              resolve();
-            };
-            request.onerror = reject;
-          });
-        },
-        add(fileObj) {
-          return new Promise((resolve, reject) => {
-            const tx = this.db.transaction(["files"], "readwrite");
-            const store = tx.objectStore("files");
-            store.put(fileObj);
-            tx.oncomplete = resolve;
-            tx.onerror = reject;
-          });
-        },
-        get(id) {
-          return new Promise((resolve) => {
-            const tx = this.db.transaction(["files"], "readonly");
-            const req = tx.objectStore("files").get(id);
-            req.onsuccess = () => resolve(req.result);
-            req.onerror = () => resolve(null);
-          });
-        },
-        del(id) {
-          return new Promise((resolve) => {
-            const tx = this.db.transaction(["files"], "readwrite");
-            tx.objectStore("files").delete(id);
-            tx.oncomplete = resolve;
-          });
-        },
-      };
-
       // ================= EXPORTAÇÃO EXCEL =================
+      function downloadBlob(blob, filename) {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(link.href);
+          link.remove();
+        }, 500);
+      }
+
       function exportarXLSX() {
         const data = loadUser();
-        if (!data) return;
+        if (!data) return alert("Nenhum dado carregado para exportar.");
+        if (typeof XLSX === "undefined" || !XLSX.utils) {
+          return alert("Biblioteca de Excel não carregou. Atualize a página e tente novamente.");
+        }
 
         const wb = XLSX.utils.book_new();
 
@@ -1753,7 +1751,7 @@
           data.accounts.map((a) => [a.id, a.name]),
         );
 
-        const sortedTx = data.transactions.sort((a, b) =>
+        const sortedTx = [...data.transactions].sort((a, b) =>
           b.dateISO.localeCompare(a.dateISO),
         );
 
@@ -1841,7 +1839,7 @@
 
       function exportarCSV() {
         const data = loadUser();
-        if (!data) return;
+        if (!data) return alert("Nenhum dado carregado para exportar.");
         const catMap = Object.fromEntries(
           data.categories.map((c) => [c.id, c.name]),
         );
@@ -1849,7 +1847,7 @@
           data.accounts.map((a) => [a.id, a.name]),
         );
         let csv = "Data;Descrição;Categoria;Conta;Valor;Tipo;Forma\n";
-        data.transactions
+        [...data.transactions]
           .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
           .forEach((t) => {
             csv += `${new Date(t.dateISO + "T12:00:00").toLocaleDateString("pt-BR")};${(t.description || "").replace(/;/g, ",")};${catMap[t.categoryId] || ""};${t.accountId ? accMap[t.accountId] || "" : t.credit ? "Fatura" : ""};${t.amount.toString().replace(".", ",")};${t.type};${t.method || ""}\n`;
@@ -1857,10 +1855,7 @@
         const blob = new Blob(["\ufeff" + csv], {
           type: "text/csv;charset=utf-8;",
         });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `lancamentos.csv`;
-        link.click();
+        downloadBlob(blob, `lancamentos.csv`);
       }
 
       function exportarFaturaPDF() {
@@ -1920,9 +1915,16 @@
 
       // ================= LOGICA DE INICIALIZAÇÃO =================
 
+      function bindExportButtons() {
+        if ($("#btnExportXLSX")) $("#btnExportXLSX").onclick = exportarXLSX;
+        if ($("#btnExportCSV")) $("#btnExportCSV").onclick = exportarCSV;
+        if ($("#btnExportPDF")) $("#btnExportPDF").onclick = exportarFaturaPDF;
+      }
+
       window.onload = async () => {
         loadTheme();
         $("#btnTheme").onclick = toggleTheme;
+        bindExportButtons();
 
         if (localStorage.getItem(SESSION_KEY)) {
           try {
@@ -1930,8 +1932,7 @@
             if (s.user) {
               currentUser = s.user;
               const res = await apiRequest("loadUser", { username: s.user });
-              userDataCache = res.data;
-              await anexoDB.init(`anexos_${currentUser}`);
+              userDataCache = normalizeUserData(res.data);
               $("#auth").classList.add("hidden");
               $("#app").classList.remove("hidden");
               $("#app").classList.add("flex");
@@ -1963,8 +1964,7 @@
           try {
             const res = await apiRequest("login", { username: u, password: p });
             currentUser = u;
-            userDataCache = res.data;
-            await anexoDB.init(`anexos_${currentUser}`);
+            userDataCache = normalizeUserData(res.data);
             if ($("#loginRemember").checked) {
               localStorage.setItem(SESSION_KEY, JSON.stringify({ user: u }));
             }
@@ -2004,20 +2004,6 @@
           location.reload();
         };
 
-        const closeSidebar = () => {
-          if (window.innerWidth < 768) {
-            $("#sidebar").classList.add("hidden");
-            $("#sidebarBackdrop").classList.add("hidden");
-            document.body.classList.remove("overflow-hidden");
-          }
-        };
-
-        const openSidebar = () => {
-          $("#sidebar").classList.remove("hidden");
-          $("#sidebarBackdrop").classList.remove("hidden");
-          document.body.classList.add("overflow-hidden");
-        };
-
         $$(".navbtn").forEach(
           (b) =>
             (b.onclick = () => {
@@ -2049,26 +2035,12 @@
               );
               $$(".view").forEach((v) => v.classList.add("hidden"));
               $("#view-" + b.dataset.view).classList.remove("hidden");
-              closeSidebar();
+              $("#sidebar").classList.add("hidden");
               renderAll();
             }),
         );
 
-        $("#btnMenu").onclick = () => {
-          if ($("#sidebar").classList.contains("hidden")) openSidebar();
-          else closeSidebar();
-        };
-
-        $("#sidebarBackdrop").onclick = closeSidebar;
-        window.addEventListener("resize", () => {
-          if (window.innerWidth >= 768) {
-            $("#sidebar").classList.remove("hidden");
-            $("#sidebarBackdrop").classList.add("hidden");
-            document.body.classList.remove("overflow-hidden");
-          } else {
-            $("#sidebar").classList.add("hidden");
-          }
-        });
+        $("#btnMenu").onclick = () => $("#sidebar").classList.toggle("hidden");
 
         $("#formLanc").onsubmit = (e) => {
           e.preventDefault();
@@ -2184,13 +2156,19 @@
             valor: parseNum($("#boletoValor").value),
             venc: $("#boletoVenc").value,
             pix: $("#boletoPix").value,
+            updatedAt: Date.now(),
           };
 
           if (id) {
             const idx = d.boletos.findIndex((b) => b.id === id);
             if (idx > -1) d.boletos[idx] = { ...d.boletos[idx], ...bolData };
           } else {
-            d.boletos.push({ id: uuid(), ...bolData });
+            d.boletos.push({
+              id: uuid(),
+              ...bolData,
+              createdAt: Date.now(),
+              expiraEm: Date.now() + 30 * 86400000,
+            });
           }
           saveUser(d);
           $("#formBoleto").reset();
@@ -2234,6 +2212,8 @@
             nome: $("#metaNome").value,
             valor: parseNum($("#metaValor").value),
             valorAtual: 0,
+            createdAt: Date.now(),
+            guardadoEm: [],
           });
           saveUser(d);
           e.target.reset();
@@ -2255,6 +2235,12 @@
           const m = d.metas.find((x) => x.id === id);
           if (m) {
             m.valorAtual = (m.valorAtual || 0) + val;
+            m.guardadoEm = Array.isArray(m.guardadoEm) ? m.guardadoEm : [];
+            m.guardadoEm.push({
+              contaId: acc,
+              valor: val,
+              dateISO: todayISO(),
+            });
             d.transactions.push({
               id: uuid(),
               dateISO: todayISO(),
@@ -2262,7 +2248,7 @@
               amount: val,
               accountId: acc,
               description: `Economia Meta: ${m.nome}`,
-              categoryId: d.categories[0].id,
+              categoryId: d.categories.find((c) => c.type === "saída")?.id || d.categories[0]?.id || "",
             });
             saveUser(d);
             $("#modalMeta").classList.add("hidden");
@@ -2277,45 +2263,6 @@
           }
         };
 
-        $("#fileAnexo").onchange = async (e) => {
-          const d = loadUser();
-          for (const f of e.target.files) {
-            const id = uuid();
-            await anexoDB.add({ id, file: f });
-            d.anexos.push({ id, name: f.name });
-          }
-          saveUser(d);
-          e.target.value = null;
-        };
-        window.downloadAnexo = async (id, name) => {
-          const rec = await anexoDB.get(id);
-          if (rec) {
-            const url = URL.createObjectURL(rec.file);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = name;
-            a.click();
-          } else alert("Arquivo não encontrado.");
-        };
-        window.delAnexo = async (id) => {
-          if (confirm("Excluir anexo?")) {
-            await anexoDB.del(id);
-            const d = loadUser();
-            d.anexos = d.anexos.filter((x) => x.id !== id);
-            saveUser(d);
-          }
-        };
-        window.renameAnexo = (id, oldName) => {
-          const newName = prompt("Novo nome:", oldName);
-          if (newName) {
-            const d = loadUser();
-            const a = d.anexos.find((x) => x.id === id);
-            if (a) {
-              a.name = newName;
-              saveUser(d);
-            }
-          }
-        };
 
         window.closeSettings = () =>
           $("#modalSettings").classList.add("hidden");
@@ -2410,7 +2357,7 @@
         $("#fatCartao").onchange = renderFatDet;
         $("#fatMes").onchange = renderFatDet;
 
-        function renderFatDet() {
+        window.renderFatDet = function renderFatDet() {
           const cid = $("#fatCartao").value;
           const mes = $("#fatMes").value;
 
@@ -2487,10 +2434,7 @@
           }
         };
 
-        $("#btnExportPDF").onclick = exportarFaturaPDF;
-
-        $("#btnExportXLSX").onclick = exportarXLSX;
-        $("#btnExportCSV").onclick = exportarCSV;
+        bindExportButtons();
 
         $("#btnExportJSON").onclick = () => {
           const payload = {
@@ -2511,7 +2455,7 @@
           r.onload = async (ev) => {
             try {
               const payload = JSON.parse(ev.target.result);
-              const importedData = payload.data || payload;
+              const importedData = normalizeUserData(payload.data || payload);
               userDataCache = importedData;
               await saveUser(importedData);
               alert("Backup importado com sucesso.");
@@ -2522,20 +2466,105 @@
           r.readAsText(e.target.files[0]);
         };
 
+        ["#filtroTexto", "#filtroMes"].forEach((sel) => {
+          if ($(sel)) {
+            $(sel).addEventListener("input", () => renderAll());
+            $(sel).addEventListener("change", () => renderAll());
+          }
+        });
+
         $("#lancData").value = todayISO();
       };
 
       async function login(u, p) {
         const res = await apiRequest("login", { username: u, password: p });
         currentUser = u;
-        userDataCache = res.data;
-        await anexoDB.init(`anexos_${u}`);
+        userDataCache = normalizeUserData(res.data);
         return true;
       }
 
+
+      function getDashboardChartSettings(data) {
+        if (!data.settings) data.settings = {};
+        const base = { fluxo: true, consumo: true, previsao: true };
+        data.settings.dashboardCharts = {
+          ...base,
+          ...(data.settings.dashboardCharts || {}),
+        };
+        return data.settings.dashboardCharts;
+      }
+
+      function renderDashboardChartControls(data) {
+        const wrap = $("#dashboardChartControls");
+        if (!wrap) return;
+
+        const settings = getDashboardChartSettings(data);
+        const items = [
+          { key: "fluxo", label: "Fluxo de Caixa" },
+          { key: "consumo", label: "Receita vs Saídas" },
+          { key: "previsao", label: "Previsão do Mês" },
+        ];
+
+        wrap.innerHTML = items
+          .map(
+            (item) => `
+              <label class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 cursor-pointer">
+                <span class="text-sm font-medium text-zinc-700 dark:text-zinc-200">${item.label}</span>
+                <input
+                  type="checkbox"
+                  class="h-4 w-4 rounded text-emerald-600"
+                  ${settings[item.key] ? "checked" : ""}
+                  onchange="toggleDashboardChart('${item.key}', this.checked)"
+                />
+              </label>
+            `,
+          )
+          .join("");
+      }
+
+      function applyDashboardChartVisibility(data) {
+        const settings = getDashboardChartSettings(data);
+        const map = {
+          fluxo: "#cardChartFluxo",
+          consumo: "#cardChartConsumo",
+          previsao: "#cardChartPrevisao",
+        };
+
+        Object.entries(map).forEach(([key, selector]) => {
+          const el = $(selector);
+          if (!el) return;
+          el.classList.toggle("hidden", !settings[key]);
+        });
+
+        const grid = $("#dashboardChartsGrid");
+        if (grid) {
+          const visibleCount = Object.values(settings).filter(Boolean).length;
+          grid.className =
+            visibleCount <= 1
+              ? "grid grid-cols-1 gap-6"
+              : "grid grid-cols-1 xl:grid-cols-2 gap-6";
+        }
+      }
+
+      window.toggleDashboardChart = function (key, checked) {
+        const data = loadUser();
+        if (!data) return;
+        const settings = getDashboardChartSettings(data);
+        settings[key] = !!checked;
+        applyDashboardChartVisibility(data);
+        saveUser(data);
+        setTimeout(() => {
+          if (typeof window.chF?.resize === "function") window.chF.resize();
+          if (typeof window.chConsumo?.resize === "function") window.chConsumo.resize();
+          if (typeof window.chPrev?.resize === "function") window.chPrev.resize();
+        }, 80);
+      };
+
+
       function renderAll() {
         if (!currentUser) return;
-        const d = loadUser();
+        userDataCache = normalizeUserData(loadUser());
+        const d = userDataCache;
         const cur = d.settings.currency || "BRL";
         const nowYM = ym(new Date());
         const tx = d.transactions.filter(
@@ -2569,6 +2598,8 @@
         );
 
         renderLists(d, cur);
+        renderDashboardChartControls(d);
+        applyDashboardChartVisibility(d);
         renderCharts(d);
         fillSelects(d);
 
@@ -2656,21 +2687,50 @@
           ]),
         );
 
-        $("#tbodyLanc").innerHTML = d.transactions
-          .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
+        const filtroTexto = ($("#filtroTexto")?.value || "").trim().toLowerCase();
+        const filtroMes = $("#filtroMes")?.value || "";
+        let lancamentosFiltrados = [...d.transactions].sort((a, b) =>
+          b.dateISO.localeCompare(a.dateISO),
+        );
+
+        if (filtroMes) {
+          lancamentosFiltrados = lancamentosFiltrados.filter(
+            (t) => ym(t.dateISO) === filtroMes || t.invoiceMonth === filtroMes,
+          );
+        }
+        if (filtroTexto) {
+          lancamentosFiltrados = lancamentosFiltrados.filter((t) => {
+            const busca = [
+              t.description,
+              cm[t.categoryId] || "",
+              t.accountId ? am[t.accountId] : t.credit ? "Fatura" : "",
+              t.method || "",
+              t.type || "",
+            ]
+              .join(" ")
+              .toLowerCase();
+            return busca.includes(filtroTexto);
+          });
+        }
+
+        $("#tbodyLanc").innerHTML = lancamentosFiltrados
           .slice(0, 100)
           .map(
             (t) => `
             <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800 border-b border-zinc-100 dark:border-zinc-700">
-                <td class="p-3 text-xs text-zinc-500 whitespace-nowrap">${new Date(t.dateISO + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</td>
-                <td class="p-3 font-medium dark:text-zinc-200">${t.description}</td>
-                <td class="p-3 hidden sm:table-cell text-xs text-zinc-500">${cm[t.categoryId] || ""}</td>
-                <td class="p-3 hidden sm:table-cell text-xs text-zinc-500">${t.accountId ? am[t.accountId] : t.credit ? "Fatura" : ""}</td>
+                <td class="p-3 text-xs text-zinc-500 whitespace-nowrap">${new Date(t.dateISO + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" })}</td>
+                <td class="p-3 font-medium dark:text-zinc-200">${escapeHtml(t.description)}</td>
+                <td class="p-3 hidden sm:table-cell text-xs text-zinc-500">${escapeHtml(cm[t.categoryId] || "")}</td>
+                <td class="p-3 hidden sm:table-cell text-xs text-zinc-500">${escapeHtml(t.accountId ? am[t.accountId] : t.credit ? "Fatura" : "")}</td>
                 <td class="p-3 text-right font-bold ${t.type === "saída" ? "text-red-600" : "text-emerald-600"}">${fmt(t.amount, cur)}</td>
                 <td class="p-3 text-center"><button onclick="deleteTransaction('${t.id}')"><i class="fa-solid fa-trash text-zinc-300 hover:text-red-500"></i></button></td>
             </tr>`,
           )
           .join("");
+
+        if (!lancamentosFiltrados.length) {
+          $("#tbodyLanc").innerHTML = `<tr><td colspan="6" class="p-4 text-center text-sm text-zinc-500">Nenhum lançamento encontrado para esse filtro.</td></tr>`;
+        }
 
         $("#listaContas").innerHTML = d.accounts
           .map((a) => {
@@ -2682,14 +2742,14 @@
                   (s, t) => s + (t.type === "entrada" ? t.amount : -t.amount),
                   0,
                 );
-            return `<li class="flex justify-between p-2 bg-zinc-50 dark:bg-zinc-800 rounded border border-zinc-100 dark:border-zinc-700 text-sm"><span class="font-medium dark:text-zinc-200">${a.name}</span><span class="text-zinc-600 dark:text-zinc-400">${fmt(b, cur)}</span><button onclick="delAccount('${a.id}')" class="ml-2 text-zinc-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button></li>`;
+            return `<li class="flex justify-between items-center gap-3 p-2 bg-zinc-50 dark:bg-zinc-800 rounded border border-zinc-100 dark:border-zinc-700 text-sm"><span class="font-medium dark:text-zinc-200 break-words min-w-0 flex-1">${escapeHtml(a.name)}</span><span class="text-zinc-600 dark:text-zinc-400 whitespace-nowrap">${fmt(b, cur)}</span><button onclick="delAccount('${a.id}')" class="ml-2 text-zinc-300 hover:text-red-500 flex-shrink-0"><i class="fa-solid fa-xmark"></i></button></li>`;
           })
           .join("");
 
         $("#listaCats").innerHTML = d.categories
           .map(
             (c) =>
-              `<li class="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-100 dark:border-zinc-700"><div class="flex items-center gap-2 shrink-0"><span class="text-xl">${c.icon || ""}</span><span class="font-medium text-sm text-zinc-700 dark:text-zinc-200">${c.name}</span> <span class="text-xs px-2 py-0.5 rounded-full ${c.type === "entrada" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}">${c.type}</span></div> <button onclick="delCat('${c.id}')" class="text-zinc-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></li>`,
+              `<li class="flex justify-between items-center gap-3 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-100 dark:border-zinc-700"><div class="flex items-center gap-2 min-w-0"><span class="text-xl">${escapeHtml(c.icon || "")}</span><span class="font-medium text-sm text-zinc-700 dark:text-zinc-200 break-words">${escapeHtml(c.name)}</span> <span class="text-xs px-2 py-0.5 rounded-full ${c.type === "entrada" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}">${escapeHtml(c.type)}</span></div> <button onclick="delCat('${c.id}')" class="text-zinc-400 hover:text-red-500 flex-shrink-0"><i class="fa-solid fa-trash"></i></button></li>`,
           )
           .join("");
 
@@ -2705,12 +2765,63 @@
             const v2 = d.transactions
               .filter((t) => t.credit?.cardId === c.id && t.invoiceMonth === m2)
               .reduce((s, t) => s + t.amount, 0);
-            return `<tr class="border-b border-zinc-100 dark:border-zinc-700"><td class="p-3 font-medium text-zinc-700 dark:text-zinc-300">${c.name}</td><td class="p-3 text-right"><button onclick="viewFatura('${c.id}','${m1}')" class="font-bold ${v1 > 0 ? "text-indigo-600 dark:text-indigo-400 hover:underline" : "text-zinc-400"}">${fmt(v1, cur)}</button></td><td class="p-3 text-right"><button onclick="viewFatura('${c.id}','${m2}')" class="text-sm ${v2 > 0 ? "text-zinc-600 dark:text-zinc-400 hover:underline" : "text-zinc-400"}">${fmt(v2, cur)}</button></td></tr>`;
+            return `<tr class="border-b border-zinc-100 dark:border-zinc-700"><td class="p-3 font-medium text-zinc-700 dark:text-zinc-300">${escapeHtml(c.name)}</td><td class="p-3 text-right"><button onclick="viewFatura('${c.id}','${m1}')" class="font-bold ${v1 > 0 ? "text-indigo-600 dark:text-indigo-400 hover:underline" : "text-zinc-400"}">${fmt(v1, cur)}</button></td><td class="p-3 text-right"><button onclick="viewFatura('${c.id}','${m2}')" class="text-sm ${v2 > 0 ? "text-zinc-600 dark:text-zinc-400 hover:underline" : "text-zinc-400"}">${fmt(v2, cur)}</button></td></tr>`;
           })
           .join("");
+
+        $("#listaBoletos").innerHTML = d.boletos
+          .sort((a, b) => a.venc.localeCompare(b.venc))
+          .map((b) => {
+            const dias = daysBetween(new Date(b.expiraEm));
+            return `<li class="p-4 rounded-xl border border-orange-200 dark:border-orange-800/30 bg-orange-50 dark:bg-orange-900/10 space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="font-bold text-orange-900 dark:text-orange-300 break-words">${escapeHtml(b.desc)}</div>
+                  <div class="text-sm text-zinc-600 dark:text-zinc-400">Vencimento: ${new Date(b.venc + "T12:00:00").toLocaleDateString("pt-BR")} • Valor: ${fmt(b.valor, cur)}</div>
+                  <div class="text-xs text-zinc-500 mt-1">PIX: ${b.pix ? escapeHtml(b.pix) : "Não informado"}</div>
+                  <div class="text-xs text-zinc-500">Cadastro expira em ${Math.max(dias, 0)} dia(s).</div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap sm:justify-end">
+                  <button onclick="editBoleto('${b.id}')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border text-sm">Editar</button>
+                  <button onclick='copyPix(${JSON.stringify(b.pix || "")})' class="px-3 py-1.5 rounded-lg bg-orange-600 text-white text-sm ${b.pix ? '' : 'hidden'}">Copiar PIX</button>
+                  <button onclick="delBoleto('${b.id}')" class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm">Excluir</button>
+                </div>
+              </div>
+            </li>`;
+          })
+          .join("") || `<li class="text-sm text-zinc-500">Nenhum boleto ativo.</li>`;
+
+        $("#listaMetas").innerHTML = d.metas
+          .map((m) => {
+            const pct = Math.min(100, Math.round(((m.valorAtual || 0) / (m.valor || 1)) * 100));
+            const faltante = Math.max((m.valor || 0) - (m.valorAtual || 0), 0);
+            const porConta = (m.guardadoEm || []).reduce((acc, item) => {
+              acc[item.contaId] = (acc[item.contaId] || 0) + Number(item.valor || 0);
+              return acc;
+            }, {});
+            const guardadoHtml = Object.entries(porConta)
+              .map(([contaId, valor]) => `<span class="inline-flex px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs">${escapeHtml(am[contaId] || 'Conta removida')}: ${fmt(valor, cur)}</span>`)
+              .join(' ');
+            return `<li class="p-4 rounded-xl border border-purple-200 dark:border-purple-800/30 bg-purple-50/70 dark:bg-purple-900/10 space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="font-bold text-purple-900 dark:text-purple-300 break-words">${escapeHtml(m.nome)}</div>
+                  <div class="text-sm text-zinc-600 dark:text-zinc-400">Meta cadastrada: ${fmt(m.valor, cur)} • Guardado: ${fmt(m.valorAtual || 0, cur)} • Falta: ${fmt(faltante, cur)}</div>
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                  <button onclick="addValorMeta('${m.id}')" class="px-3 py-2 rounded-lg bg-purple-600 text-white text-sm font-bold">Guardar valor</button>
+                  <button onclick="delMeta('${m.id}')" class="px-3 py-2 rounded-lg bg-red-600 text-white text-sm">Excluir</button>
+                </div>
+              </div>
+              <div class="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-2.5 overflow-hidden"><div class="bg-purple-500 h-2.5 rounded-full" style="width:${pct}%"></div></div>
+              <div class="text-xs text-zinc-500">${pct}% concluído</div>
+              <div class="flex flex-wrap gap-2">${guardadoHtml || '<span class="text-xs text-zinc-500">Ainda não há valores guardados em nenhuma conta.</span>'}</div>
+            </li>`;
+          })
+          .join("") || `<li class="text-sm text-zinc-500">Nenhuma meta cadastrada.</li>`;
       }
 
-      function fillSelects(d) {
+            function fillSelects(d) {
         const accs = d.accounts
           .map((a) => `<option value="${a.id}">${a.name}</option>`)
           .join("");
@@ -2750,10 +2861,10 @@
 
         const ms = [];
         for (let i = -2; i < 12; i++) ms.push(ym(addMonths(new Date(), i)));
-        $("#filtroMes").innerHTML = ms
-          .map((m) => `<option value="${m}">${m}</option>`)
+        $("#filtroMes").innerHTML = [`<option value="">Todos os meses</option>`]
+          .concat(ms.map((m) => `<option value="${m}">${m}</option>`))
           .join("");
-        $("#filtroMes").value = ym(new Date());
+        if (!$("#filtroMes").value) $("#filtroMes").value = ym(new Date());
 
         const fatMes = document.getElementById("fatMes");
         if (fatMes) {
@@ -2837,8 +2948,8 @@
             );
           }
         }
-        if (window.chF) window.chF.destroy();
-        window.chF = new Chart($("#chartFluxo"), {
+        if (window.chF) { window.chF.destroy(); window.chF = null; }
+        if (getDashboardChartSettings(d).fluxo && $("#chartFluxo")) window.chF = new Chart($("#chartFluxo"), {
           type: "bar",
           data: {
             labels: lbs,
@@ -2871,8 +2982,8 @@
           .reduce((s, t) => s + t.amount, 0);
         const saldoAteHoje = Math.max(0, recAteHoje - saiAteHoje);
 
-        if (window.chConsumo) window.chConsumo.destroy();
-        if ($("#chartConsumoAtual")) {
+        if (window.chConsumo) { window.chConsumo.destroy(); window.chConsumo = null; }
+        if (getDashboardChartSettings(d).consumo && $("#chartConsumoAtual")) {
           window.chConsumo = new Chart($("#chartConsumoAtual"), {
             type: "doughnut",
             data: {
@@ -2910,8 +3021,8 @@
           .reduce((s, t) => s + t.amount, 0);
         const saldoMesTodo = Math.max(0, recMesTodo - saiMesTodo);
 
-        if (window.chPrev) window.chPrev.destroy();
-        if ($("#chartPrevisao")) {
+        if (window.chPrev) { window.chPrev.destroy(); window.chPrev = null; }
+        if (getDashboardChartSettings(d).previsao && $("#chartPrevisao")) {
           window.chPrev = new Chart($("#chartPrevisao"), {
             type: "doughnut",
             data: {
